@@ -1,0 +1,51 @@
+function fitSD(filename)
+% D=[0
+% 0.511061947
+% 1.095132743
+% 1.581858407
+% 2.311946903
+% 3.35840708  
+% 4.648230088
+% 6.011061947];
+% S=[1
+% 0.982856365
+% 0.925991773
+% 0.822372548
+% 0.671044999
+% 0.498841029
+% 0.352430228
+% 0.240702655];
+clc
+close
+data=csvread(filename);
+data=data(data(:,1)<8,:);
+D=data(:,1);
+S=data(:,2);
+options = optimset;
+options.Display = 'notify';
+options.TolFun = 1e-25;
+options.TolX = 1e-25;
+options.MaxIter = 3000;
+options.MaxFunEvals = 3000;
+options.Algorithm = 'trust-region-reflective'; % either: 'levenberg-marquardt' 'trust-region-reflective'
+
+
+x0=[0.01,0.01];
+lb=[0,0];
+ub=[10,10];
+[x] = lsqcurvefit(@fit,x0,D,(S),lb,ub,options);
+x
+x(1)/x(2)
+results=fit(x,D);
+plot(D,S,'.', 'MarkerSize',12);
+hold on
+plot(D,(results),'Color','red');
+%plot(D,(fit([0.112,0.049],D)));
+set(gca,'yscale','log');
+ylim([0.001,1]);
+xlim([0 15]);
+end
+
+function y = fit(p,D)
+y=exp(-p(1)*D-p(2)*D.^2);
+end
